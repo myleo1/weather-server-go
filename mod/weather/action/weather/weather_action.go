@@ -23,7 +23,7 @@ func getCity(ctx *context.Context) {
 
 type getWeatherParams struct {
 	GetLive     class.Bool `description:"是否获取实时天气" default:"true"`
-	GetForecast class.Bool `description:"是否获取预报天气" default:"false"`
+	GetForecast class.Bool `description:"是否获取预报天气" default:"true"`
 	Location    string     `validate:"required" description:"城市编码"`
 }
 

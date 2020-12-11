@@ -4,7 +4,9 @@ go 1.15
 
 require (
 	github.com/lib/pq v1.8.0
+	github.com/markbates/pkger v0.17.1
 	github.com/mizuki1412/go-core-kit v0.0.0-20200929142440-99ec274d4764
+	github.com/spf13/cast v1.3.1
 	github.com/spf13/cobra v1.1.1
 	github.com/tidwall/gjson v1.6.1
 	linkortech/framework/lkt-service-core v0.0.1

@@ -3,6 +3,7 @@ package weatherdao
 import (
 	"github.com/mizuki1412/go-core-kit/library/httpkit"
 	"github.com/mizuki1412/go-core-kit/service/configkit"
+	"github.com/spf13/cast"
 	"github.com/tidwall/gjson"
 	"net/http"
 )
@@ -3307,7 +3308,22 @@ func GetWeather(location string) interface{} {
 	var ret interface{}
 	for k, v := range rs1 {
 		if k == "lives" {
-			ret = v.Value()
+			s := cast.ToSlice(v.Value())
+			m := cast.ToStringMap(s[0])
+			weather := m["weather"]
+			switch weather {
+			case "阵雨", "雷阵雨", "雷阵雨并伴有冰雹", "阵雨夹雪", "冻雨", "雪", "阵雪", "小雪-中雪", "雨雪天气", "雨夹雪":
+				m["rain"] = "30"
+			case "小雨", "中雨", "大雨", "毛毛雨/细雨", "雨", "小雨-中雨", "中雨-大雨", "小雪", "中雪", "中雪-大雪":
+				m["rain"] = "80"
+			case "暴雨", "大暴雨", "特大暴雨", "强阵雨", "强雷阵雨", "大雨-暴雨", "暴雨-大暴雨", "大雪", "暴雪", "大雪-暴雪":
+				m["rain"] = "90"
+			case "极端降雨", "大暴雨-特大暴雨":
+				m["rain"] = "100"
+			default:
+				m["rain"] = "0"
+			}
+			ret = m
 		}
 	}
 	return ret
@@ -3320,10 +3336,27 @@ func GetWeatherCast(location string) interface{} {
 		Url:    "https://restapi.amap.com/v3/weather/weatherInfo?key=" + key + "&city=" + location + "&extensions=all",
 	})
 	rs2 := gjson.Parse(ret2).Get("forecasts").Array()[0].Map()
-	var ret interface{}
+	ret := make([]map[string]interface{}, 0, 5)
 	for k, v := range rs2 {
 		if k == "casts" {
-			ret = v.Value()
+			vv := cast.ToSlice(v.Value())
+			for _, vvv := range vv {
+				m := cast.ToStringMap(vvv)
+				weather := m["dayweather"]
+				switch weather {
+				case "阵雨", "雷阵雨", "雷阵雨并伴有冰雹", "阵雨夹雪", "冻雨", "雪", "阵雪", "小雪-中雪", "雨雪天气", "雨夹雪":
+					m["rain"] = "30"
+				case "小雨", "中雨", "大雨", "毛毛雨/细雨", "雨", "小雨-中雨", "中雨-大雨", "小雪", "中雪", "中雪-大雪":
+					m["rain"] = "80"
+				case "暴雨", "大暴雨", "特大暴雨", "强阵雨", "强雷阵雨", "大雨-暴雨", "暴雨-大暴雨", "大雪", "暴雪", "大雪-暴雪":
+					m["rain"] = "90"
+				case "极端降雨", "大暴雨-特大暴雨":
+					m["rain"] = "100"
+				default:
+					m["rain"] = "0"
+				}
+				ret = append(ret, m)
+			}
 		}
 	}
 	return ret
